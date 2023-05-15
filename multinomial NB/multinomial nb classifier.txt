@@ -1,0 +1,25 @@
+using Statistics
+# Define a function to train the Multinomial Naive Bayes classifier
+function train_multinomial_naive_bayes(documents, labels)
+    # Get the unique labels and calculate the prior probabilities
+    unique_labels = unique(labels)
+    prior_probs = [sum(labels .== label) / length(labels) for label in unique_labels]
+
+    # Split the documents into separate words and count the occurrences of each word for each label
+    word_counts = Dict{String, Vector{Int}}()
+    for i in 1:length(documents)
+        words = split(documents[i], " ")
+        label = labels[i]
+        if !haskey(word_counts, label)
+            word_counts[label] = zeros(Int, length(unique(words)))
+        end
+        for word in words
+            word_counts[label][findfirst(unique(words), word)] += 1
+        end
+    end
+
+    # Calculate the conditional probabilities for each word and label combination
+    word_probs = Dict{String, Vector{Float64}}()
+    for (label, counts) in word_counts
+        total_count = sum(counts)
+        word_probs[label] = (counts .+ 1
